@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Placement & Salary Predictor</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 700px; margin: 30px auto; padding: 0 20px; color: #222; }
+  h1 { font-size: 22px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  label { display: block; font-size: 13px; margin-bottom: 4px; color: #444; }
+  input, select { width: 100%; padding: 6px; box-sizing: border-box; margin-bottom: 10px; }
+  button { padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 4px;
+           font-size: 15px; cursor: pointer; margin-top: 10px; }
+  button:hover { background: #1d4ed8; }
+  #result { margin-top: 20px; padding: 16px; border-radius: 6px; display: none; }
+  #result.placed { background: #dcfce7; border: 1px solid #16a34a; }
+  #result.not-placed { background: #fee2e2; border: 1px solid #dc2626; }
+  #result h2 { margin-top: 0; font-size: 18px; }
+  #error { color: #dc2626; margin-top: 10px; display: none; }
+</style>
+</head>
+<body>
+
+<h1>AI-Powered Placement and Salary Predictor</h1>
+<p style="font-size:13px;color:#666">
+  Backend must be running at <code>http://127.0.0.1:8000</code> (start with
+  <code>uvicorn api.main:app --reload</code> from the repo root).
+</p>
+
+<form id="predictForm">
+  <div class="grid">
+    <div><label>Age</label><input type="number" id="age" value="21" required></div>
+    <div><label>Gender</label>
+      <select id="gender"><option>Male</option><option>Female</option></select>
+    </div>
+    <div><label>CGPA</label><input type="number" step="0.01" id="cgpa" value="8.0" required></div>
+    <div><label>Branch</label>
+      <select id="branch">
+        <option>CSE</option><option>IT</option><option>ECE</option>
+        <option>EEE</option><option>Mechanical</option><option>Civil</option>
+      </select>
+    </div>
+    <div><label>College Tier</label>
+      <select id="college_tier"><option>Tier 1</option><option>Tier 2</option><option>Tier 3</option></select>
+    </div>
+    <div><label>Backlogs</label><input type="number" id="backlogs" value="0" required></div>
+    <div><label>Internships</label><input type="number" id="internships_count" value="1" required></div>
+    <div><label>Projects</label><input type="number" id="projects_count" value="3" required></div>
+    <div><label>Certifications</label><input type="number" id="certifications_count" value="2" required></div>
+    <div><label>Hackathons</label><input type="number" id="hackathons_participated" value="1" required></div>
+    <div><label>GitHub Repos</label><input type="number" id="github_repos" value="3" required></div>
+    <div><label>LinkedIn Connections</label><input type="number" id="linkedin_connections" value="150" required></div>
+    <div><label>Coding Skill Score</label><input type="number" step="0.1" id="coding_skill_score" value="75" required></div>
+    <div><label>Aptitude Score</label><input type="number" step="0.1" id="aptitude_score" value="70" required></div>
+    <div><label>Communication Score</label><input type="number" step="0.1" id="communication_skill_score" value="70" required></div>
+    <div><label>Logical Reasoning Score</label><input type="number" step="0.1" id="logical_reasoning_score" value="70" required></div>
+    <div><label>Mock Interview Score</label><input type="number" step="0.1" id="mock_interview_score" value="75" required></div>
+    <div><label>Attendance %</label><input type="number" step="0.1" id="attendance_percentage" value="85" required></div>
+    <div><label>Extracurricular Score</label><input type="number" step="0.1" id="extracurricular_score" value="60" required></div>
+    <div><label>Leadership Score</label><input type="number" step="0.1" id="leadership_score" value="55" required></div>
+    <div><label>Volunteer Experience</label>
+      <select id="volunteer_experience"><option>Yes</option><option>No</option></select>
+    </div>
+    <div><label>Sleep Hours</label><input type="number" step="0.1" id="sleep_hours" value="7" required></div>
+    <div><label>Study Hours / Day</label><input type="number" step="0.1" id="study_hours_per_day" value="3" required></div>
+  </div>
+  <button type="submit">Predict</button>
+</form>
+
+<div id="error"></div>
+<div id="result"></div>
+
+<script>
+document.getElementById('predictForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  const errorDiv = document.getElementById('error');
+  const resultDiv = document.getElementById('result');
+  errorDiv.style.display = 'none';
+  resultDiv.style.display = 'none';
+
+  const payload = {
+    age: parseInt(document.getElementById('age').value),
+    gender: document.getElementById('gender').value,
+    cgpa: parseFloat(document.getElementById('cgpa').value),
+    branch: document.getElementById('branch').value,
+    college_tier: document.getElementById('college_tier').value,
+    internships_count: parseInt(document.getElementById('internships_count').value),
+    projects_count: parseInt(document.getElementById('projects_count').value),
+    certifications_count: parseInt(document.getElementById('certifications_count').value),
+    coding_skill_score: parseFloat(document.getElementById('coding_skill_score').value),
+    aptitude_score: parseFloat(document.getElementById('aptitude_score').value),
+    communication_skill_score: parseFloat(document.getElementById('communication_skill_score').value),
+    logical_reasoning_score: parseFloat(document.getElementById('logical_reasoning_score').value),
+    hackathons_participated: parseInt(document.getElementById('hackathons_participated').value),
+    github_repos: parseInt(document.getElementById('github_repos').value),
+    linkedin_connections: parseInt(document.getElementById('linkedin_connections').value),
+    mock_interview_score: parseFloat(document.getElementById('mock_interview_score').value),
+    attendance_percentage: parseFloat(document.getElementById('attendance_percentage').value),
+    backlogs: parseInt(document.getElementById('backlogs').value),
+    extracurricular_score: parseFloat(document.getElementById('extracurricular_score').value),
+    leadership_score: parseFloat(document.getElementById('leadership_score').value),
+    volunteer_experience: document.getElementById('volunteer_experience').value,
+    sleep_hours: parseFloat(document.getElementById('sleep_hours').value),
+    study_hours_per_day: parseFloat(document.getElementById('study_hours_per_day').value),
+  };
+
+  try {
+    const response = await fetch('http://127.0.0.1:8000/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errBody = await response.json().catch(() => ({}));
+      throw new Error(errBody.detail ? JSON.stringify(errBody.detail) : `HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    const isPlaced = data.placement_prediction === 'Placed';
+
+    resultDiv.className = isPlaced ? 'placed' : 'not-placed';
+    resultDiv.innerHTML = `
+      <h2>${data.placement_prediction}</h2>
+      <p><strong>Placement probability:</strong> ${(data.placement_probability * 100).toFixed(1)}%</p>
+      ${data.salary_prediction !== null
+        ? `<p><strong>Estimated salary:</strong> ${data.salary_prediction} LPA</p>`
+        : ''}
+      ${data.note ? `<p style="font-size:13px;color:#555">${data.note}</p>` : ''}
+    `;
+    resultDiv.style.display = 'block';
+  } catch (err) {
+    errorDiv.textContent = 'Error: ' + err.message + ' (is the backend running at http://127.0.0.1:8000 ?)';
+    errorDiv.style.display = 'block';
+  }
+});
+</script>
+
+</body>
+</html>

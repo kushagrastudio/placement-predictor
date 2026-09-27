@@ -1,3 +1,6 @@
+"""
+train_salary.py
+"""
 import joblib
 from pathlib import Path
 from sklearn.model_selection import train_test_split
@@ -9,48 +12,32 @@ from sklearn.metrics import mean_absolute_error, r2_score
 from load_data import load_raw_data
 from preprocessing import build_preprocessor, get_salary_features_target
 
-MODEL_DIR = Path("models")
+MODEL_DIR = Path(__file__).resolve().parent.parent / "models"
 MODEL_DIR.mkdir(exist_ok=True)
 
 
 def train_and_compare():
     df = load_raw_data()
     X, y = get_salary_features_target(df)
-
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
-    )
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     candidates = {
         "linear_regression": LinearRegression(),
         "random_forest_reg": RandomForestRegressor(n_estimators=200, random_state=42),
     }
-
-    results = {}
-    fitted_pipelines = {}
-
+    results, fitted = {}, {}
     for name, model in candidates.items():
-        pipeline = Pipeline([
-            ("preprocessor", build_preprocessor()),
-            ("regressor", model),
-        ])
+        pipeline = Pipeline([("preprocessor", build_preprocessor()), ("regressor", model)])
         pipeline.fit(X_train, y_train)
         preds = pipeline.predict(X_test)
-
-        mae = mean_absolute_error(y_test, preds)
-        r2 = r2_score(y_test, preds)
+        mae, r2 = mean_absolute_error(y_test, preds), r2_score(y_test, preds)
         results[name] = {"mae": mae, "r2": r2}
-        fitted_pipelines[name] = pipeline
-
+        fitted[name] = pipeline
         print(f"{name}: MAE={mae:.4f}, R2={r2:.4f}")
 
     best_name = max(results, key=lambda n: results[n]["r2"])
-    best_pipeline = fitted_pipelines[best_name]
-    print(f"\nBest model: {best_name}")
-
-    joblib.dump(best_pipeline, MODEL_DIR / "salary_regressor.pkl")
-    print(f"Saved best model to {MODEL_DIR / 'salary_regressor.pkl'}")
-
+    joblib.dump(fitted[best_name], MODEL_DIR / "salary_regressor.pkl")
+    print(f"\nBest model: {best_name} -> saved to {MODEL_DIR / 'salary_regressor.pkl'}")
     return results
 
 
