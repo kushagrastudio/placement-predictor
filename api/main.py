@@ -1,7 +1,3 @@
-"""
-api/main.py
-Vercel serverless-compatible FastAPI entrypoint.
-"""
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -10,7 +6,7 @@ import joblib
 from pathlib import Path
 import pandas as pd
 
-app = FastAPI(title="Placement & Salary Predictor API")
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
@@ -19,19 +15,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── Model loading ──────────────────────────────────────────────
 MODEL_DIR = Path(__file__).resolve().parent.parent / "models"
-_placement_model = None
-_salary_model = None
 
-def _load_models():
-    global _placement_model, _salary_model
-    if _placement_model is None:
-        _placement_model = joblib.load(MODEL_DIR / "placement_classifier.pkl")
-    if _salary_model is None:
-        _salary_model = joblib.load(MODEL_DIR / "salary_regressor.pkl")
+def load_model(path):
+    return joblib.load(path)
 
-# ── Schemas ────────────────────────────────────────────────────
 class StudentInput(BaseModel):
     age: int
     gender: str
@@ -63,11 +51,12 @@ class PredictionOutput(BaseModel):
     salary_prediction: Optional[float]
     note: Optional[str]
 
-# ── Routes ─────────────────────────────────────────────────────
 @app.post("/predict", response_model=PredictionOutput)
 def predict(student: StudentInput):
     try:
-        _load_models()
+        placement_model = load_model(MODEL_DIR / "placement_classifier.pkl")
+        salary_model = load_model(MODEL_DIR / "salary_regressor.pkl")
+        
         student_data = student.model_dump()
         X = pd.DataFrame([student_data])
 
@@ -79,9 +68,9 @@ def predict(student: StudentInput):
                 "note": "Marked ineligible due to active backlogs.",
             }
 
-        placement_pred = _placement_model.predict(X)[0]
-        classes = list(_placement_model.classes_)
-        placement_proba = _placement_model.predict_proba(X)[0][classes.index("Placed")]
+        placement_pred = placement_model.predict(X)[0]
+        classes = list(placement_model.classes_)
+        placement_proba = placement_model.predict_proba(X)[0][classes.index("Placed")]
 
         result = {
             "placement_prediction": placement_pred,
@@ -90,12 +79,12 @@ def predict(student: StudentInput):
             "note": None,
         }
         if placement_pred == "Placed":
-            result["salary_prediction"] = round(float(_salary_model.predict(X)[0]), 2)
+            result["salary_prediction"] = round(float(salary_model.predict(X)[0]), 2)
         return result
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/health")
-def health_check():
+def health():
     return {"status": "ok"}
