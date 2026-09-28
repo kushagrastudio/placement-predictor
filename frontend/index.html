@@ -1,136 +1,206 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Placement & Salary Predictor</title>
-<style>
-  body { font-family: Arial, sans-serif; max-width: 700px; margin: 30px auto; padding: 0 20px; color: #222; }
-  h1 { font-size: 22px; }
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  label { display: block; font-size: 13px; margin-bottom: 4px; color: #444; }
-  input, select { width: 100%; padding: 6px; box-sizing: border-box; margin-bottom: 10px; }
-  button { padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 4px;
-           font-size: 15px; cursor: pointer; margin-top: 10px; }
-  button:hover { background: #1d4ed8; }
-  #result { margin-top: 20px; padding: 16px; border-radius: 6px; display: none; }
-  #result.placed { background: #dcfce7; border: 1px solid #16a34a; }
-  #result.not-placed { background: #fee2e2; border: 1px solid #dc2626; }
-  #result h2 { margin-top: 0; font-size: 18px; }
-  #error { color: #dc2626; margin-top: 10px; display: none; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Placement Predictor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+    h2 { text-align: center; color: #333; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-group { display: flex; flex-direction: column; }
+    label { font-size: 13px; font-weight: bold; margin-bottom: 4px; color: #555; }
+    input, select { padding: 8px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; }
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover { background-color: #0056b3; }
+    #result { margin-top: 20px; padding: 15px; border-radius: 6px; display: none; }
+    .Placed { background-color: #e6fffa; border: 1px solid #38b2ac; color: #234e52; }
+    .NotPlaced { background-color: #fff5f5; border: 1px solid #feb2b2; color: #9b2c2c; }
+  </style>
 </head>
 <body>
 
-<h1>AI-Powered Placement and Salary Predictor</h1>
-
-<form id="predictForm">
-  <div class="grid">
-    <div><label>Age</label><input type="number" id="age" value="21" required></div>
-    <div><label>Gender</label>
-      <select id="gender"><option>Male</option><option>Female</option></select>
+  <h2>Placement Predictor</h2>
+  <form id="predictorForm">
+    <div class="grid">
+      <div class="form-group">
+        <label for="age">Age</label>
+        <input type="number" id="age" value="21" required>
+      </div>
+      <div class="form-group">
+        <label for="gender">Gender</label>
+        <select id="gender"><option value="Male">Male</option><option value="Female">Female</option></select>
+      </div>
+      <div class="form-group">
+        <label for="cgpa">CGPA</label>
+        <input type="number" step="0.01" id="cgpa" value="8.2" required>
+      </div>
+      <div class="form-group">
+        <label for="branch">Branch</label>
+        <select id="branch"><option value="CSE">CSE</option><option value="ECE">ECE</option><option value="IT">IT</option><option value="ME">ME</option></select>
+      </div>
+      <div class="form-group">
+        <label for="college_tier">College Tier</label>
+        <select id="college_tier"><option value="Tier 1">Tier 1</option><option value="Tier 2">Tier 2</option><option value="Tier 3">Tier 3</option></select>
+      </div>
+      <div class="form-group">
+        <label for="backlogs">Active Backlogs</label>
+        <input type="number" id="backlogs" value="0" required>
+      </div>
+      <div class="form-group">
+        <label for="internships_count">Internships Count</label>
+        <input type="number" id="internships_count" value="1" required>
+      </div>
+      <div class="form-group">
+        <label for="projects_count">Projects Count</label>
+        <input type="number" id="projects_count" value="2" required>
+      </div>
+      <div class="form-group">
+        <label for="certifications_count">Certifications</label>
+        <input type="number" id="certifications_count" value="1" required>
+      </div>
+      <div class="form-group">
+        <label for="coding_skill_score">Coding Skill (0-100)</label>
+        <input type="number" step="0.1" id="coding_skill_score" value="75" required>
+      </div>
+      <div class="form-group">
+        <label for="aptitude_score">Aptitude Score (0-100)</label>
+        <input type="number" step="0.1" id="aptitude_score" value="80" required>
+      </div>
+      <div class="form-group">
+        <label for="communication_skill_score">Communication (0-100)</label>
+        <input type="number" step="0.1" id="communication_skill_score" value="70" required>
+      </div>
+      <div class="form-group">
+        <label for="logical_reasoning_score">Logical Reasoning (0-100)</label>
+        <input type="number" step="0.1" id="logical_reasoning_score" value="78" required>
+      </div>
+      <div class="form-group">
+        <label for="mock_interview_score">Mock Interview (0-100)</label>
+        <input type="number" step="0.1" id="mock_interview_score" value="72" required>
+      </div>
+      <div class="form-group">
+        <label for="hackathons_participated">Hackathons</label>
+        <input type="number" id="hackathons_participated" value="1" required>
+      </div>
+      <div class="form-group">
+        <label for="github_repos">GitHub Repos</label>
+        <input type="number" id="github_repos" value="5" required>
+      </div>
+      <div class="form-group">
+        <label for="linkedin_connections">LinkedIn Connections</label>
+        <input type="number" id="linkedin_connections" value="250" required>
+      </div>
+      <div class="form-group">
+        <label for="attendance_percentage">Attendance %</label>
+        <input type="number" step="0.1" id="attendance_percentage" value="85" required>
+      </div>
+      <div class="form-group">
+        <label for="extracurricular_score">Extracurricular (0-100)</label>
+        <input type="number" step="0.1" id="extracurricular_score" value="60" required>
+      </div>
+      <div class="form-group">
+        <label for="leadership_score">Leadership (0-100)</label>
+        <input type="number" step="0.1" id="leadership_score" value="50" required>
+      </div>
+      <div class="form-group">
+        <label for="volunteer_experience">Volunteer Exp.</label>
+        <select id="volunteer_experience"><option value="Yes">Yes</option><option value="No">No</option></select>
+      </div>
+      <div class="form-group">
+        <label for="sleep_hours">Sleep Hours/Day</label>
+        <input type="number" step="0.1" id="sleep_hours" value="7" required>
+      </div>
+      <div class="form-group">
+        <label for="study_hours_per_day">Study Hours/Day</label>
+        <input type="number" step="0.1" id="study_hours_per_day" value="4" required>
+      </div>
     </div>
-    <div><label>CGPA</label><input type="number" step="0.01" id="cgpa" value="8.0" required></div>
-    <div><label>Branch</label>
-      <select id="branch">
-        <option>CSE</option><option>IT</option><option>ECE</option>
-        <option>EEE</option><option>Mechanical</option><option>Civil</option>
-      </select>
-    </div>
-    <div><label>College Tier</label>
-      <select id="college_tier"><option>Tier 1</option><option>Tier 2</option><option>Tier 3</option></select>
-    </div>
-    <div><label>Backlogs</label><input type="number" id="backlogs" value="0" required></div>
-    <div><label>Internships</label><input type="number" id="internships_count" value="1" required></div>
-    <div><label>Projects</label><input type="number" id="projects_count" value="3" required></div>
-    <div><label>Certifications</label><input type="number" id="certifications_count" value="2" required></div>
-    <div><label>Hackathons</label><input type="number" id="hackathons_participated" value="1" required></div>
-    <div><label>GitHub Repos</label><input type="number" id="github_repos" value="3" required></div>
-    <div><label>LinkedIn Connections</label><input type="number" id="linkedin_connections" value="150" required></div>
-    <div><label>Coding Skill Score</label><input type="number" step="0.1" id="coding_skill_score" value="75" required></div>
-    <div><label>Aptitude Score</label><input type="number" step="0.1" id="aptitude_score" value="70" required></div>
-    <div><label>Communication Score</label><input type="number" step="0.1" id="communication_skill_score" value="70" required></div>
-    <div><label>Logical Reasoning Score</label><input type="number" step="0.1" id="logical_reasoning_score" value="70" required></div>
-    <div><label>Mock Interview Score</label><input type="number" step="0.1" id="mock_interview_score" value="75" required></div>
-    <div><label>Attendance %</label><input type="number" step="0.1" id="attendance_percentage" value="85" required></div>
-    <div><label>Extracurricular Score</label><input type="number" step="0.1" id="extracurricular_score" value="60" required></div>
-    <div><label>Leadership Score</label><input type="number" step="0.1" id="leadership_score" value="55" required></div>
-    <div><label>Volunteer Experience</label>
-      <select id="volunteer_experience"><option>Yes</option><option>No</option></select>
-    </div>
-    <div><label>Sleep Hours</label><input type="number" step="0.1" id="sleep_hours" value="7" required></div>
-    <div><label>Study Hours / Day</label><input type="number" step="0.1" id="study_hours_per_day" value="3" required></div>
-  </div>
-  <button type="submit">Predict</button>
-</form>
 
-<div id="error"></div>
-<div id="result"></div>
+    <button type="submit">Predict Placement</button>
+  </form>
 
-<script>
-document.getElementById('predictForm').addEventListener('submit', async function (e) {
-  e.preventDefault();
-  const errorDiv = document.getElementById('error');
-  const resultDiv = document.getElementById('result');
-  errorDiv.style.display = 'none';
-  resultDiv.style.display = 'none';
+  <div id="result"></div>
 
-  const payload = {
-    age: parseInt(document.getElementById('age').value),
-    gender: document.getElementById('gender').value,
-    cgpa: parseFloat(document.getElementById('cgpa').value),
-    branch: document.getElementById('branch').value,
-    college_tier: document.getElementById('college_tier').value,
-    internships_count: parseInt(document.getElementById('internships_count').value),
-    projects_count: parseInt(document.getElementById('projects_count').value),
-    certifications_count: parseInt(document.getElementById('certifications_count').value),
-    coding_skill_score: parseFloat(document.getElementById('coding_skill_score').value),
-    aptitude_score: parseFloat(document.getElementById('aptitude_score').value),
-    communication_skill_score: parseFloat(document.getElementById('communication_skill_score').value),
-    logical_reasoning_score: parseFloat(document.getElementById('logical_reasoning_score').value),
-    hackathons_participated: parseInt(document.getElementById('hackathons_participated').value),
-    github_repos: parseInt(document.getElementById('github_repos').value),
-    linkedin_connections: parseInt(document.getElementById('linkedin_connections').value),
-    mock_interview_score: parseFloat(document.getElementById('mock_interview_score').value),
-    attendance_percentage: parseFloat(document.getElementById('attendance_percentage').value),
-    backlogs: parseInt(document.getElementById('backlogs').value),
-    extracurricular_score: parseFloat(document.getElementById('extracurricular_score').value),
-    leadership_score: parseFloat(document.getElementById('leadership_score').value),
-    volunteer_experience: document.getElementById('volunteer_experience').value,
-    sleep_hours: parseFloat(document.getElementById('sleep_hours').value),
-    study_hours_per_day: parseFloat(document.getElementById('study_hours_per_day').value),
-  };
+  <script>
+    const API_URL = 'https://placement-predictor-oyxh.onrender.com/predict';
 
-  try {
-    const response = await fetch('/predict', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+    document.getElementById('predictorForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const resultDiv = document.getElementById('result');
+      resultDiv.style.display = 'block';
+      resultDiv.className = '';
+      resultDiv.innerHTML = 'Calculating prediction...';
+
+      const formData = {
+        age: parseInt(document.getElementById('age').value),
+        gender: document.getElementById('gender').value,
+        cgpa: parseFloat(document.getElementById('cgpa').value),
+        branch: document.getElementById('branch').value,
+        college_tier: document.getElementById('college_tier').value,
+        internships_count: parseInt(document.getElementById('internships_count').value),
+        projects_count: parseInt(document.getElementById('projects_count').value),
+        certifications_count: parseInt(document.getElementById('certifications_count').value),
+        coding_skill_score: parseFloat(document.getElementById('coding_skill_score').value),
+        aptitude_score: parseFloat(document.getElementById('aptitude_score').value),
+        communication_skill_score: parseFloat(document.getElementById('communication_skill_score').value),
+        logical_reasoning_score: parseFloat(document.getElementById('logical_reasoning_score').value),
+        hackathons_participated: parseInt(document.getElementById('hackathons_participated').value),
+        github_repos: parseInt(document.getElementById('github_repos').value),
+        linkedin_connections: parseInt(document.getElementById('linkedin_connections').value),
+        mock_interview_score: parseFloat(document.getElementById('mock_interview_score').value),
+        attendance_percentage: parseFloat(document.getElementById('attendance_percentage').value),
+        backlogs: parseInt(document.getElementById('backlogs').value),
+        extracurricular_score: parseFloat(document.getElementById('extracurricular_score').value),
+        leadership_score: parseFloat(document.getElementById('leadership_score').value),
+        volunteer_experience: document.getElementById('volunteer_experience').value,
+        sleep_hours: parseFloat(document.getElementById('sleep_hours').value),
+        study_hours_per_day: parseFloat(document.getElementById('study_hours_per_day').value)
+      };
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+        const data = await response.json();
+        const isPlaced = data.placement_prediction === 'Placed';
+
+        resultDiv.className = isPlaced ? 'Placed' : 'NotPlaced';
+        resultDiv.innerHTML = `
+          <h3>Status: ${data.placement_prediction}</h3>
+          <p><strong>Probability:</strong> ${(data.placement_probability * 100).toFixed(2)}%</p>
+          ${data.salary_prediction ? `<p><strong>Predicted Salary:</strong> ₹${data.salary_prediction.toLocaleString()}</p>` : ''}
+          ${data.note ? `<p><strong>Note:</strong> ${data.note}</p>` : ''}
+        `;
+      } catch (err) {
+        resultDiv.className = 'NotPlaced';
+        resultDiv.innerHTML = `<strong>Error:</strong> Unable to connect to prediction server (${err.message}).`;
+      }
     });
-
-    if (!response.ok) {
-      const errBody = await response.json().catch(() => ({}));
-      throw new Error(errBody.detail ? JSON.stringify(errBody.detail) : `HTTP ${response.status}`);
-    }
-
-    const data = await response.json();
-    const isPlaced = data.placement_prediction === 'Placed';
-
-    resultDiv.className = isPlaced ? 'placed' : 'not-placed';
-    resultDiv.innerHTML = `
-      <h2>${data.placement_prediction}</h2>
-      <p><strong>Placement probability:</strong> ${(data.placement_probability * 100).toFixed(1)}%</p>
-      ${data.salary_prediction !== null
-        ? `<p><strong>Estimated salary:</strong> ${data.salary_prediction} LPA</p>`
-        : ''}
-      ${data.note ? `<p style="font-size:13px;color:#555">${data.note}</p>` : ''}
-    `;
-    resultDiv.style.display = 'block';
-  } catch (err) {
-    errorDiv.textContent = 'Error: ' + err.message;
-    errorDiv.style.display = 'block';
-  }
-});
-</script>
-
+  </script>
 </body>
 </html>
