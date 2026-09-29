@@ -4,337 +4,105 @@
 <meta charset="UTF-8">
 <title>Placement & Salary Predictor</title>
 <style>
-  * { box-sizing: border-box; }
-  body { font-family: Arial, sans-serif; max-width: 750px; margin: 30px auto; padding: 0 20px; color: #222; }
-  h1 { font-size: 22px; margin-bottom: 4px; }
-  .subtitle { font-size: 13px; color: #666; margin-bottom: 20px; }
+  body { font-family: Arial, sans-serif; max-width: 700px; margin: 30px auto; padding: 0 20px; color: #222; }
+  h1 { font-size: 22px; }
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .field { display: flex; flex-direction: column; }
-  label { font-size: 13px; margin-bottom: 3px; color: #444; font-weight: 500; }
-  .hint { font-size: 11px; color: #888; margin-bottom: 4px; }
-  input, select { width: 100%; padding: 7px 9px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
-  input:invalid { border-color: #e53e3e; }
-  input.error-field { border-color: #e53e3e; background: #fff5f5; }
-  button { padding: 11px 28px; background: #2563eb; color: white; border: none; border-radius: 4px;
-           font-size: 15px; cursor: pointer; margin-top: 14px; }
+  label { display: block; font-size: 13px; margin-bottom: 4px; color: #444; }
+  input, select { width: 100%; padding: 6px; box-sizing: border-box; margin-bottom: 10px; }
+  button { padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 4px;
+           font-size: 15px; cursor: pointer; margin-top: 10px; }
   button:hover { background: #1d4ed8; }
-  button:disabled { background: #93c5fd; cursor: not-allowed; }
-  #result { margin-top: 22px; padding: 18px; border-radius: 8px; display: none; }
+  #result { margin-top: 20px; padding: 16px; border-radius: 6px; display: none; }
   #result.placed { background: #dcfce7; border: 1px solid #16a34a; }
   #result.not-placed { background: #fee2e2; border: 1px solid #dc2626; }
-  #result h2 { margin-top: 0; font-size: 20px; }
-  .prob-bar-wrap { background: #e5e7eb; border-radius: 20px; height: 10px; margin: 6px 0 12px; }
-  .prob-bar { height: 10px; border-radius: 20px; transition: width 0.5s; }
-  .placed .prob-bar { background: #16a34a; }
-  .not-placed .prob-bar { background: #dc2626; }
-  #validation-errors { background: #fff5f5; border: 1px solid #fc8181; border-radius: 6px;
-                        padding: 10px 14px; margin-top: 12px; display: none; font-size: 13px; color: #c53030; }
-  #validation-errors ul { margin: 4px 0 0 16px; padding: 0; }
-  #api-error { color: #dc2626; margin-top: 10px; display: none; font-size: 13px; }
-  .section-title { grid-column: 1/-1; font-size: 13px; font-weight: 700; color: #2563eb;
-                   border-bottom: 1px solid #dbeafe; padding-bottom: 4px; margin-top: 8px; }
+  #result h2 { margin-top: 0; font-size: 18px; }
+  #error { color: #dc2626; margin-top: 10px; display: none; white-space: pre-wrap; }
 </style>
 </head>
 <body>
 
-<h1>AI-Powered Placement & Salary Predictor</h1>
-<p class="subtitle">Fill in your academic and skill details to get a placement prediction.</p>
+<h1>AI-Powered Placement and Salary Predictor</h1>
+<p style="font-size:13px;color:#666">
+  Connected to: <code id="apiUrlDisplay"></code>
+</p>
 
-<form id="predictForm" novalidate>
+<form id="predictForm">
   <div class="grid">
-
-    <div class="section-title">Personal & Academic</div>
-
-    <div class="field">
-      <label>Age</label>
-      <span class="hint">18 – 30</span>
-      <input type="number" id="age" value="21" min="18" max="30" step="1">
-    </div>
-    <div class="field">
-      <label>Gender</label>
-      <span class="hint">&nbsp;</span>
+    <div><label>Age</label><input type="number" id="age" min="18" max="30" value="21" required></div>
+    <div><label>Gender</label>
       <select id="gender"><option>Male</option><option>Female</option></select>
     </div>
-    <div class="field">
-      <label>CGPA</label>
-      <span class="hint">0.0 – 10.0</span>
-      <input type="number" id="cgpa" value="8.0" min="0" max="10" step="0.01">
-    </div>
-    <div class="field">
-      <label>Branch</label>
-      <span class="hint">&nbsp;</span>
+    <div><label>CGPA</label><input type="number" step="0.01" min="0" max="10" id="cgpa" value="8.0" required></div>
+    <div><label>Branch</label>
       <select id="branch">
         <option>CSE</option><option>IT</option><option>ECE</option>
         <option>EEE</option><option>Mechanical</option><option>Civil</option>
       </select>
     </div>
-    <div class="field">
-      <label>College Tier</label>
-      <span class="hint">&nbsp;</span>
-      <select id="college_tier">
-        <option>Tier 1</option><option>Tier 2</option><option>Tier 3</option>
-      </select>
+    <div><label>College Tier</label>
+      <select id="college_tier"><option>Tier 1</option><option>Tier 2</option><option>Tier 3</option></select>
     </div>
-    <div class="field">
-      <label>Backlogs</label>
-      <span class="hint">0 – 10</span>
-      <input type="number" id="backlogs" value="0" min="0" max="10" step="1">
-    </div>
-    <div class="field">
-      <label>Attendance %</label>
-      <span class="hint">0 – 100</span>
-      <input type="number" id="attendance_percentage" value="85" min="0" max="100" step="0.1">
-    </div>
-    <div class="field">
-      <label>Study Hours / Day</label>
-      <span class="hint">0 – 16</span>
-      <input type="number" id="study_hours_per_day" value="3" min="0" max="16" step="0.1">
-    </div>
-    <div class="field">
-      <label>Sleep Hours / Day</label>
-      <span class="hint">0 – 12</span>
-      <input type="number" id="sleep_hours" value="7" min="0" max="12" step="0.1">
-    </div>
-
-    <div class="section-title">Experience & Activities</div>
-
-    <div class="field">
-      <label>Internships</label>
-      <span class="hint">0 – 10</span>
-      <input type="number" id="internships_count" value="1" min="0" max="10" step="1">
-    </div>
-    <div class="field">
-      <label>Projects</label>
-      <span class="hint">0 – 20</span>
-      <input type="number" id="projects_count" value="3" min="0" max="20" step="1">
-    </div>
-    <div class="field">
-      <label>Certifications</label>
-      <span class="hint">0 – 20</span>
-      <input type="number" id="certifications_count" value="2" min="0" max="20" step="1">
-    </div>
-    <div class="field">
-      <label>Hackathons</label>
-      <span class="hint">0 – 20</span>
-      <input type="number" id="hackathons_participated" value="1" min="0" max="20" step="1">
-    </div>
-    <div class="field">
-      <label>GitHub Repos</label>
-      <span class="hint">0 – 100</span>
-      <input type="number" id="github_repos" value="3" min="0" max="100" step="1">
-    </div>
-    <div class="field">
-      <label>LinkedIn Connections</label>
-      <span class="hint">0 – 5000</span>
-      <input type="number" id="linkedin_connections" value="150" min="0" max="5000" step="1">
-    </div>
-    <div class="field">
-      <label>Volunteer Experience</label>
-      <span class="hint">&nbsp;</span>
+    <div><label>Backlogs</label><input type="number" id="backlogs" min="0" max="10" value="0" required></div>
+    <div><label>Internships</label><input type="number" id="internships_count" min="0" max="10" value="1" required></div>
+    <div><label>Projects</label><input type="number" id="projects_count" min="0" max="20" value="3" required></div>
+    <div><label>Certifications</label><input type="number" id="certifications_count" min="0" max="20" value="2" required></div>
+    <div><label>Hackathons</label><input type="number" id="hackathons_participated" min="0" max="20" value="1" required></div>
+    <div><label>GitHub Repos</label><input type="number" id="github_repos" min="0" max="100" value="3" required></div>
+    <div><label>LinkedIn Connections</label><input type="number" id="linkedin_connections" min="0" max="2000" value="150" required></div>
+    <div><label>Coding Skill Score</label><input type="number" step="0.1" min="0" max="100" id="coding_skill_score" value="75" required></div>
+    <div><label>Aptitude Score</label><input type="number" step="0.1" min="0" max="100" id="aptitude_score" value="70" required></div>
+    <div><label>Communication Score</label><input type="number" step="0.1" min="0" max="100" id="communication_skill_score" value="70" required></div>
+    <div><label>Logical Reasoning Score</label><input type="number" step="0.1" min="0" max="100" id="logical_reasoning_score" value="70" required></div>
+    <div><label>Mock Interview Score</label><input type="number" step="0.1" min="0" max="100" id="mock_interview_score" value="75" required></div>
+    <div><label>Attendance %</label><input type="number" step="0.1" min="0" max="100" id="attendance_percentage" value="85" required></div>
+    <div><label>Extracurricular Score</label><input type="number" step="0.1" min="0" max="100" id="extracurricular_score" value="60" required></div>
+    <div><label>Leadership Score</label><input type="number" step="0.1" min="0" max="100" id="leadership_score" value="55" required></div>
+    <div><label>Volunteer Experience</label>
       <select id="volunteer_experience"><option>Yes</option><option>No</option></select>
     </div>
-    <div class="field">
-      <label>Extracurricular Score</label>
-      <span class="hint">0 – 100</span>
-      <input type="number" id="extracurricular_score" value="60" min="0" max="100" step="0.1">
-    </div>
-    <div class="field">
-      <label>Leadership Score</label>
-      <span class="hint">0 – 100</span>
-      <input type="number" id="leadership_score" value="55" min="0" max="100" step="0.1">
-    </div>
-
-    <div class="section-title">Skill Scores (0 – 100)</div>
-
-    <div class="field">
-      <label>Coding Skill Score</label>
-      <span class="hint">0 – 100</span>
-      <input type="number" id="coding_skill_score" value="75" min="0" max="100" step="0.1">
-    </div>
-    <div class="field">
-      <label>Aptitude Score</label>
-      <span class="hint">0 – 100</span>
-      <input type="number" id="aptitude_score" value="70" min="0" max="100" step="0.1">
-    </div>
-    <div class="field">
-      <label>Communication Score</label>
-      <span class="hint">0 – 100</span>
-      <input type="number" id="communication_skill_score" value="70" min="0" max="100" step="0.1">
-    </div>
-    <div class="field">
-      <label>Logical Reasoning Score</label>
-      <span class="hint">0 – 100</span>
-      <input type="number" id="logical_reasoning_score" value="70" min="0" max="100" step="0.1">
-    </div>
-    <div class="field">
-      <label>Mock Interview Score</label>
-      <span class="hint">0 – 100</span>
-      <input type="number" id="mock_interview_score" value="75" min="0" max="100" step="0.1">
-    </div>
-
+    <div><label>Sleep Hours</label><input type="number" step="0.1" min="0" max="24" id="sleep_hours" value="7" required></div>
+    <div><label>Study Hours / Day</label><input type="number" step="0.1" min="0" max="24" id="study_hours_per_day" value="3" required></div>
   </div>
-
-  <div id="validation-errors"><ul id="error-list"></ul></div>
   <button type="submit">Predict</button>
 </form>
 
-<div id="api-error"></div>
+<div id="error"></div>
 <div id="result"></div>
 
 <script>
-// ── Validation rules ──────────────────────────────────────────
-const RULES = [
-  { id: 'age',                      label: 'Age',                    min: 18,   max: 30,   int: true },
-  { id: 'cgpa',                     label: 'CGPA',                   min: 0,    max: 10 },
-  { id: 'backlogs',                 label: 'Backlogs',               min: 0,    max: 10,   int: true },
-  { id: 'attendance_percentage',    label: 'Attendance %',           min: 0,    max: 100 },
-  { id: 'study_hours_per_day',      label: 'Study Hours/Day',        min: 0,    max: 16 },
-  { id: 'sleep_hours',              label: 'Sleep Hours',            min: 0,    max: 12 },
-  { id: 'internships_count',        label: 'Internships',            min: 0,    max: 10,   int: true },
-  { id: 'projects_count',           label: 'Projects',               min: 0,    max: 20,   int: true },
-  { id: 'certifications_count',     label: 'Certifications',         min: 0,    max: 20,   int: true },
-  { id: 'hackathons_participated',  label: 'Hackathons',             min: 0,    max: 20,   int: true },
-  { id: 'github_repos',             label: 'GitHub Repos',           min: 0,    max: 100,  int: true },
-  { id: 'linkedin_connections',     label: 'LinkedIn Connections',   min: 0,    max: 5000, int: true },
-  { id: 'extracurricular_score',    label: 'Extracurricular Score',  min: 0,    max: 100 },
-  { id: 'leadership_score',         label: 'Leadership Score',       min: 0,    max: 100 },
-  { id: 'coding_skill_score',       label: 'Coding Skill Score',     min: 0,    max: 100 },
-  { id: 'aptitude_score',           label: 'Aptitude Score',         min: 0,    max: 100 },
-  { id: 'communication_skill_score',label: 'Communication Score',    min: 0,    max: 100 },
-  { id: 'logical_reasoning_score',  label: 'Logical Reasoning Score',min: 0,    max: 100 },
-  { id: 'mock_interview_score',     label: 'Mock Interview Score',   min: 0,    max: 100 },
-];
+// ── Single source of truth for the backend URL ──
+// Update ONLY this line if the deployment URL ever changes.
+const API_BASE_URL = 'https://placement-predictor-amber.vercel.app';
 
-// ── College tier score multiplier ────────────────────────────
-// Applied on top of raw model probability to reflect tier reality
-const TIER_MULTIPLIER = { 'Tier 1': 1.20, 'Tier 2': 1.00, 'Tier 3': 0.82 };
-const TIER_SALARY_BONUS = { 'Tier 1': 2.5, 'Tier 2': 0, 'Tier 3': -1.5 };
-
-function clamp(val, min, max) { return Math.min(Math.max(val, min), max); }
-
-function validate() {
-  const errors = [];
-  RULES.forEach(r => {
-    const el = document.getElementById(r.id);
-    const val = parseFloat(el.value);
-    el.classList.remove('error-field');
-    if (isNaN(val)) {
-      errors.push(`${r.label}: please enter a value.`);
-      el.classList.add('error-field');
-    } else if (val < r.min || val > r.max) {
-      errors.push(`${r.label}: must be between ${r.min} and ${r.max}.`);
-      el.classList.add('error-field');
-    } else if (r.int && !Number.isInteger(val)) {
-      errors.push(`${r.label}: must be a whole number.`);
-      el.classList.add('error-field');
-    }
-  });
-  return errors;
-}
-
-function getPayload() {
-  return {
-    age:                       parseInt(document.getElementById('age').value),
-    gender:                    document.getElementById('gender').value,
-    cgpa:                      parseFloat(document.getElementById('cgpa').value),
-    branch:                    document.getElementById('branch').value,
-    college_tier:              document.getElementById('college_tier').value,
-    internships_count:         parseInt(document.getElementById('internships_count').value),
-    projects_count:            parseInt(document.getElementById('projects_count').value),
-    certifications_count:      parseInt(document.getElementById('certifications_count').value),
-    coding_skill_score:        parseFloat(document.getElementById('coding_skill_score').value),
-    aptitude_score:            parseFloat(document.getElementById('aptitude_score').value),
-    communication_skill_score: parseFloat(document.getElementById('communication_skill_score').value),
-    logical_reasoning_score:   parseFloat(document.getElementById('logical_reasoning_score').value),
-    hackathons_participated:   parseInt(document.getElementById('hackathons_participated').value),
-    github_repos:              parseInt(document.getElementById('github_repos').value),
-    linkedin_connections:      parseInt(document.getElementById('linkedin_connections').value),
-    mock_interview_score:      parseFloat(document.getElementById('mock_interview_score').value),
-    attendance_percentage:     parseFloat(document.getElementById('attendance_percentage').value),
-    backlogs:                  parseInt(document.getElementById('backlogs').value),
-    extracurricular_score:     parseFloat(document.getElementById('extracurricular_score').value),
-    leadership_score:          parseFloat(document.getElementById('leadership_score').value),
-    volunteer_experience:      document.getElementById('volunteer_experience').value,
-    sleep_hours:               parseFloat(document.getElementById('sleep_hours').value),
-    study_hours_per_day:       parseFloat(document.getElementById('study_hours_per_day').value),
-  };
-}
+document.getElementById('apiUrlDisplay').textContent = API_BASE_URL;
 
 document.getElementById('predictForm').addEventListener('submit', async function (e) {
   e.preventDefault();
-  const validationDiv = document.getElementById('validation-errors');
-  const errorList     = document.getElementById('error-list');
-  const apiErrorDiv   = document.getElementById('api-error');
-  const resultDiv     = document.getElementById('result');
-  const btn           = document.querySelector('button[type="submit"]');
+  const errorDiv = document.getElementById('error');
+  const resultDiv = document.getElementById('result');
+  errorDiv.style.display = 'none';
+  resultDiv.style.display = 'none';
 
-  // Clear previous
-  validationDiv.style.display = 'none';
-  apiErrorDiv.style.display   = 'none';
-  resultDiv.style.display     = 'none';
-
-  // Validate
-  const errors = validate();
-  if (errors.length > 0) {
-    errorList.innerHTML = errors.map(e => `<li>${e}</li>`).join('');
-    validationDiv.style.display = 'block';
-    return;
-  }
-
-  btn.disabled    = true;
-  btn.textContent = 'Predicting…';
-
-  try {
-    const payload  = getPayload();
-    const tier     = payload.college_tier;
-    const response = await fetch('/predict', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      const errBody = await response.json().catch(() => ({}));
-      throw new Error(errBody.detail ? JSON.stringify(errBody.detail) : `HTTP ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    // ── Apply tier multiplier to probability ──────────────────
-    let prob = data.placement_probability;
-    prob = clamp(prob * TIER_MULTIPLIER[tier], 0.01, 0.99);
-
-    // ── Apply tier salary bonus ───────────────────────────────
-    let salary = data.salary_prediction;
-    if (salary !== null && salary !== undefined) {
-      salary = Math.max(2, salary + TIER_SALARY_BONUS[tier]);
-    }
-
-    // ── Determine final prediction label from adjusted prob ───
-    const isPlaced = data.placement_prediction === 'Placed';
-
-    resultDiv.className = isPlaced ? 'placed' : 'not-placed';
-    resultDiv.innerHTML = `
-      <h2>${isPlaced ? '✅ Placed' : '❌ Not Placed'}</h2>
-      <p style="margin:2px 0 4px"><strong>Placement Probability: ${(prob * 100).toFixed(1)}%</strong></p>
-      <div class="prob-bar-wrap">
-        <div class="prob-bar" style="width:${(prob * 100).toFixed(1)}%"></div>
-      </div>
-      ${salary !== null && salary !== undefined
-        ? `<p><strong>Estimated Salary:</strong> ${salary.toFixed(2)} LPA</p>`
-        : ''}
-      ${data.note ? `<p style="font-size:13px;color:#555;margin-top:6px">${data.note}</p>` : ''}
-    `;
-    resultDiv.style.display = 'block';
-
-  } catch (err) {
-    apiErrorDiv.textContent  = '❌ ' + err.message;
-    apiErrorDiv.style.display = 'block';
-  } finally {
-    btn.disabled    = false;
-    btn.textContent = 'Predict';
-  }
-});
-</script>
-</body>
-</html>
+  const payload = {
+    age: parseInt(document.getElementById('age').value),
+    gender: document.getElementById('gender').value,
+    cgpa: parseFloat(document.getElementById('cgpa').value),
+    branch: document.getElementById('branch').value,
+    college_tier: document.getElementById('college_tier').value,
+    internships_count: parseInt(document.getElementById('internships_count').value),
+    projects_count: parseInt(document.getElementById('projects_count').value),
+    certifications_count: parseInt(document.getElementById('certifications_count').value),
+    coding_skill_score: parseFloat(document.getElementById('coding_skill_score').value),
+    aptitude_score: parseFloat(document.getElementById('aptitude_score').value),
+    communication_skill_score: parseFloat(document.getElementById('communication_skill_score').value),
+    logical_reasoning_score: parseFloat(document.getElementById('logical_reasoning_score').value),
+    hackathons_participated: parseInt(document.getElementById('hackathons_participated').value),
+    github_repos: parseInt(document.getElementById('github_repos').value),
+    linkedin_connections: parseInt(document.getElementById('linkedin_connections').value),
+    mock_interview_score: parseFloat(document.getElementById('mock_interview_score').value),
+    attendance_percentage: parseFloat(document.getElementById('attendance_percentage').value),
+    backlogs: parseInt(document.getElementById('backlogs').value),
+    extracurricular_score: parseFloat(document.getElementById('extracurricular_score').value),
+    leadership_score: parseFloat(document.getElementById('leadership_score').value),
+    volunteer_experience: document.getElementById('volunteer_experience').value,
+    sleep_hours: parseFloat(document.getElementById('sleep_hours').value),
